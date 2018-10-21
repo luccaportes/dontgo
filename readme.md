@@ -1,5 +1,7 @@
 # DontGo
 
+[![GoDoc](https://godoc.org/github.com/lucp2/dontgo?status.svg)](https://godoc.org/github.com/lucp2/dontgo)
+
 An unofficial client for using dontpad.com with go. Create temporary online persistence.
 
 ## dontpad.com
