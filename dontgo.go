@@ -56,7 +56,8 @@ func Write(identifier string, content interface{}) error {
 }
 
 // Read function gets an identifier and returns a string with its contents. You can also access it on
-// dontpad.com/{identifier}
+// dontpad.com/{identifier}. We do not return an error because we want you to be able to access it directly as value,
+// if there are any errors, keep in mind that it will panic. If you don't want this to happen, use ReadNoPanic instead.
 func Read(identifier string) (r string) {
 	if identifier[len(identifier)-4:] == ".zip"{
 		fmt.Println("Warning: Using .zip at the end of the identifier causes dontpad.com to generate a zip file and not returning the actual content.")
@@ -64,11 +65,33 @@ func Read(identifier string) (r string) {
 		identifier = identifier[:len(identifier)-4]
 	}
 	bow := surf.NewBrowser()
-	bow.Open("http://dontpad.com/" + identifier)
+	err := bow.Open("http://dontpad.com/" + identifier)
+	if err != nil{
+		panic(err)
+	}
 	bow.Find("textarea").Each(func(_ int, s *goquery.Selection) {
 		r = s.Text()
 	})
 	return r
+}
+
+// ReadNoPanic function is essentially the same as Read function excepts it returns an error together with the value,
+// allowing you to treat it.
+func ReadNoPanic(identifier string) (r string, err error) {
+	if identifier[len(identifier)-4:] == ".zip"{
+		fmt.Println("Warning: Using .zip at the end of the identifier causes dontpad.com to generate a zip file and not returning the actual content.")
+		fmt.Println("We have removed the \".zip\" for you")
+		identifier = identifier[:len(identifier)-4]
+	}
+	bow := surf.NewBrowser()
+	err = bow.Open("http://dontpad.com/" + identifier)
+	if err != nil{
+		return "", err
+	}
+	bow.Find("textarea").Each(func(_ int, s *goquery.Selection) {
+		r = s.Text()
+	})
+	return r, nil
 }
 
 // Append function is essentially the same as the Write function, excepts it does not overwrite the contents, if there
