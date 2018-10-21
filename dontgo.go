@@ -4,24 +4,30 @@
 // Do not ever use this in production. First because this is unofficial and there is no guarantee that dontpad
 // will not change the way they store the contents. And second because anyone is able to overwrite the identifiers
 // without any authorization.
+// You can also access what you wrote on the website dontpad.com/{identifier}
 package dontgo
 
 import (
 	"fmt"
 	"net/http"
 	"net/url"
-
-	"github.com/PuerkitoBio/goquery"
-	"gopkg.in/headzoo/surf.v1"
 	"strings"
 	"strconv"
 	"encoding/json"
+
+	"github.com/PuerkitoBio/goquery"
+	"gopkg.in/headzoo/surf.v1"
 )
 
 const (
 	baseURL = "http://dontpad.com/"
 )
 
+// Write function receives a identifier string and an empty interface content, which contains what you want to write
+// in the identifier page. You can pass pretty much anything, if it is any type of int, float or bool we will simply
+// convert it into a string. If it is anything else, we will convert it to json with the builtin json package.
+// If it can not convert, we will return its error so you can treat it. This function overwrites any previous content
+// using the same identifier.
 func Write(identifier string, content interface{}) error {
 	if identifier[len(identifier)-4:] == ".zip"{
 		fmt.Println("Warning: Using .zip at the end of the identifier causes dontpad.com to generate a zip file and not allowing to write.")
@@ -49,6 +55,8 @@ func Write(identifier string, content interface{}) error {
 	return nil
 }
 
+// Read function gets an identifier and returns a string with its contents. You can also access it on
+// dontpad.com/{identifier}
 func Read(identifier string) (r string) {
 	if identifier[len(identifier)-4:] == ".zip"{
 		fmt.Println("Warning: Using .zip at the end of the identifier causes dontpad.com to generate a zip file and not returning the actual content.")
@@ -63,6 +71,8 @@ func Read(identifier string) (r string) {
 	return r
 }
 
+// Append function is essentially the same as the Write function, excepts it does not overwrite the contents, if there
+// is any, using the same identifier. It appends to the end of the previous content.
 func Append(identifier string, content interface{}) error {
 	currentText := Read(identifier)
 	text, err := anyToString(content)
@@ -72,11 +82,12 @@ func Append(identifier string, content interface{}) error {
 	return Write(identifier, currentText+text)
 }
 
+// Clear function deletes any content previously set using a identifier.
 func Clear(identifier string) error {
 	return Write(identifier, "")
 }
 
-// We need generics
+// We need generics.
 func anyToString(i interface{}) (string, error) {
 	switch i.(type) {
 	case string:
